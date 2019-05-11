@@ -12,7 +12,7 @@
 
 
 /*конфигурация МК*/
-#define POTENT 0                       // 1 - используем свое опорное напряжение, 0 - используем опрное напряжение ардуино 1.1 В
+#define POTENT 0                        // 1 - используем свое опорное напряжение, 0 - используем опрное напряжение ардуино 1.1 В
 #define POT_GND A0						//земля потенциометра
 #define SERIAL_SPEED 115200				//скорость обмена серийного порта	
 
@@ -23,11 +23,11 @@
 #define SIGNAL_PIN_ENABLED 1			//использовать сигнальный пин или нет
 #define USE_AUDIO_AMPLIFIEW_RELAY 1		//Использовать порт для замыкания реле усилителя
 #define COUNT_OF_SIGNALS 2				//количество входных аудио-сигналов, макс - 5
-#define MEANSUREMENT_AMOUNT 10000		//количество чтений порта на одно измерения
-#define MEANSUREMENT_AMOUNT_FOR_NOISE 500//количество одинаковых сигналов, чтобы сигнал стал равен шуму
+#define MEANSUREMENT_AMOUNT 15000		//количество чтений порта на одно измерения
+#define MEANSUREMENT_AMOUNT_FOR_NOISE 2500//количество одинаковых сигналов, чтобы сигнал стал равен шуму
 #define SIGNAL_ERROR 10					//разница между значениями, когда они считаются одинаковыми
-#define DELAY 3000						//задержка, чтобы порт оказался (не)активным (в мс)
-#define MAX_COUNT_OF_MEANSUREMENT_FOR_AMPLITUDE 1000 //масимальное количество измерений для вычисления амплитуды
+#define DELAY 4000						//задержка, чтобы порт оказался (не)активным (в мс)
+#define MAX_COUNT_OF_MEANSUREMENT_FOR_AMPLITUDE 100 //масимальное количество измерений для вычисления амплитуды
 #define PERIOD_ERROR 100                    //погрешность вычисления периодов
 #define COUNT_OF_SAME_WAVES_FOR_NOISE 3 //количество волн с одинаковым периодом для приравнивания к шуму
 #define COUNT_FOR_ZERO 5				//нижего которого значения приравнивается к нулю
@@ -35,13 +35,13 @@
 
 /*пины входа/выхода*/
 #define SIGNAL_PIN 13
-#define AUDIO_AMPLIFIEW_RELAY 7
-#define FIRST_INPUT A1
-#define SECOND_INPUT A5
+#define AUDIO_AMPLIFIEW_RELAY 8
+#define FIRST_INPUT A3
+#define SECOND_INPUT A2
 #define THIRD_INPUT A6
 #define FOURTH_INPUT A1
 #define FIFTH_INPUT A4
-#define FIRST_OUTPUT 5
+#define FIRST_OUTPUT 2
 #define SECOND_OUTPUT 4
 #define THIRD_OUTPUT 3
 #define FOURTH_OUTPUT 2
@@ -216,12 +216,17 @@ bool isMusic(unsigned short pin, unsigned int meansurementAmout, unsigned int me
 	for (int i = 0; i < meansurementAmout; i++)
 	{
 		buf = analogRead(pin);		
+		if (false) {
+			Serial.print("$");
+			Serial.print(buf);
+			Serial.println(";");
+		}
 
 		if ((i > meansurementAmout / 2) || (i > MAX_COUNT_OF_MEANSUREMENT_FOR_AMPLITUDE))
 		{
 			if (isZero && !isNoise && !itIsntNoise)
 			{
-				if (buf - (signalError * 2) > amplitude)
+				if (buf - (signalError) > amplitude)
 					itIsntNoise = true;
 				
 
@@ -235,21 +240,6 @@ bool isMusic(unsigned short pin, unsigned int meansurementAmout, unsigned int me
 
 					if (countOfSameWaves >= COUNT_OF_SAME_WAVES_FOR_NOISE)
 						isNoise = true;
-					
-
-
-					//Serial.print("amp:");
-					//Serial.print(amplitude);
-					//Serial.print(";period:");
-					//Serial.print(period);
-					//Serial.print(";lastPeak:");
-					//Serial.print(lastPeak);
-					//Serial.print(";nP:");
-					//Serial.print(abs(i - lastPeak - period));
-					//Serial.print(";i:");
-					//Serial.print(i);
-					//Serial.print(";count:");
-					//Serial.println(countOfSameWaves);
 
 					period = newPeriod;
 					lastPeak = i;
@@ -283,7 +273,7 @@ bool isMusic(unsigned short pin, unsigned int meansurementAmout, unsigned int me
 		}
 	}
 
-	#if 0
+	#if 1
 	Serial.print("pin: ");
 	Serial.print(pin);
 	Serial.print("; isNoise: ");
